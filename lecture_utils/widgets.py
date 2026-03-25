@@ -10,15 +10,28 @@ Three interactive widgets for Lecture 1:
 All widgets use ipywidgets and matplotlib.
 """
 
+import io
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import torch
 import torch.nn as nn
 import ipywidgets as widgets
-from IPython.display import display
+from IPython.display import display, Image
 
 from .config import UP_BLUE, UP_GOLD, ACCENT, SEED
+
+
+def _fig_to_image(fig):
+    """
+    Render a matplotlib figure to an ipywidgets Image widget via PNG buffer.
+    Completely bypasses matplotlib's display hooks — no automatic rendering.
+    """
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png', dpi=100, bbox_inches='tight')
+    plt.close(fig)
+    buf.seek(0)
+    return widgets.Image(value=buf.read(), format='png')
 
 
 # ── 1. Activation Function Explorer ──────────────────────────────────────────
@@ -68,8 +81,7 @@ def activation_explorer():
     out = widgets.Output()
 
     def update(*args):
-        with out:
-            out.clear_output(wait=True)
+        with plt.ioff():
             ncols = 2 if show_deriv.value else 1
             fig, axes = plt.subplots(1, ncols, figsize=(13, 4))
             if ncols == 1:
@@ -77,8 +89,7 @@ def activation_explorer():
 
             for name, (fx, dfx, colour, label) in functions.items():
                 if checks[name].value:
-                    axes[0].plot(x, fx, color=colour, linewidth=2.0,
-                                 label=name)
+                    axes[0].plot(x, fx, color=colour, linewidth=2.0, label=name)
                     if show_deriv.value:
                         axes[1].plot(x, dfx, color=colour, linewidth=2.0,
                                      linestyle="--", label=f"d/dx {name}")
@@ -114,7 +125,11 @@ def activation_explorer():
                 fontsize=10, color="gray", style="italic"
             )
             plt.tight_layout()
-            plt.show()
+            img = _fig_to_image(fig)
+
+        with out:
+            out.clear_output(wait=True)
+            display(img)
 
     for cb in list(checks.values()) + [show_deriv, pinn_note]:
         cb.observe(update, names="value")
@@ -176,8 +191,7 @@ def forward_pass_widget():
     out = widgets.Output()
 
     def update(*args):
-        with out:
-            out.clear_output(wait=True)
+        with plt.ioff():
             x_val = x_slider.value
             t_val = t_slider.value
             inp = torch.tensor([[x_val, t_val]], dtype=torch.float32)
@@ -216,7 +230,11 @@ def forward_pass_widget():
                 fontsize=11, color=UP_BLUE, fontweight="bold"
             )
             plt.tight_layout()
-            plt.show()
+            img = _fig_to_image(fig)
+
+        with out:
+            out.clear_output(wait=True)
+            display(img)
 
     x_slider.observe(update, names="value")
     t_slider.observe(update, names="value")
@@ -286,15 +304,12 @@ def loss_landscape_widget():
     out = widgets.Output()
 
     def plot(w_current):
-        with out:
-            out.clear_output(wait=True)
+        with plt.ioff():
             fig, axes = plt.subplots(1, 2, figsize=(13, 4))
 
-            # ── Loss landscape ────────────────────────────────────────────────
             axes[0].plot(w_range, loss_vals, color=UP_BLUE, linewidth=2)
             loss_at_w = compute_loss_for_weight(w_current)
 
-            # Gradient (finite difference)
             dw = 0.01
             grad_approx = (compute_loss_for_weight(w_current + dw) -
                            compute_loss_for_weight(w_current - dw)) / (2 * dw)
@@ -303,7 +318,6 @@ def loss_landscape_widget():
                              color=ACCENT, s=120, zorder=5,
                              label=f"Current: w={w_current:.2f}, L={loss_at_w:.4f}")
 
-            # Draw gradient arrow
             arrow_len = -lr_slider.value * grad_approx
             axes[0].annotate("",
                 xy=(w_current + arrow_len * 0.8,
@@ -319,7 +333,6 @@ def loss_landscape_widget():
             axes[0].grid(True, alpha=0.3)
             axes[0].set_ylim(0, min(loss_vals.max(), 5))
 
-            # ── Network prediction ────────────────────────────────────────────
             net[0].weight.data[0, 0] = w_current
             with torch.no_grad():
                 y_pred = net(X_data).numpy()
@@ -343,7 +356,11 @@ def loss_landscape_widget():
                 fontsize=10, color="gray", style="italic"
             )
             plt.tight_layout()
-            plt.show()
+            img = _fig_to_image(fig)
+
+        with out:
+            out.clear_output(wait=True)
+            display(img)
 
     def on_step(_):
         w_c = current_w.value

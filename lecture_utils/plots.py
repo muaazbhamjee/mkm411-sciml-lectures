@@ -1267,3 +1267,220 @@ def plot_foundation_models():
                  fontsize=12, color=UP_BLUE, fontweight='bold')
     plt.tight_layout()
     return fig
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ANIMATION — Von Kármán vortex street time evolution
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def animate_cylinder_wake(model, data_path, device='cpu', n_frames=40,
+                           field='speed', figsize=(13, 4)):
+    """
+    Animate the cylinder wake fields predicted by the pre-trained NS PINN.
+
+    Shows the time evolution of speed (or vorticity) as vortices shed and
+    propagate downstream — the key 'so what' moment of the lecture.
+
+    Parameters
+    ----------
+    model     : NS_PINN instance (pre-trained, eval mode)
+    data_path : str — path to cylinder_nektar_wake.mat
+    device    : str
+    n_frames  : int — number of animation frames (subset of time steps)
+    field     : 'speed' | 'u' | 'v' | 'vorticity'
+
+    Returns
+    -------
+    anim : matplotlib.animation.FuncAnimation
+           Display with: IPython.display.HTML(anim.to_jshtml())
+    """
+    import scipy.io
+    import torch
+    import matplotlib.animation as animation
+
+    # ── Load dataset for spatial grid and time range ──────────────────────────
+    data   = scipy.io.loadmat(data_path)
+    X_star = data['X_star']   # (N, 2)
+    t_star = data['t'].flatten()
+
+    x_min, x_max = X_star[:, 0].min(), X_star[:, 0].max()
+    y_min, y_max = X_star[:, 1].min(), X_star[:, 1].max()
+    t_min, t_max = t_star.min(), t_star.max()
+
+    # Evaluation grid — extend upstream to include the cylinder (centred at origin)
+    # The dataset domain is typically x: [1, 8] (downstream only), so we
+    # explicitly extend to x=-2 to show the full picture
+    x_plot_min = min(x_min, -2.0)
+    x_plot_max = x_max
+    y_plot_min = min(y_min, -2.5)
+    y_plot_max = max(y_max,  2.5)
+
+    x_arr = np.linspace(x_plot_min, x_plot_max, 200)
+    y_arr = np.linspace(y_plot_min, y_plot_max, 80)
+    Xg, Yg = np.meshgrid(x_arr, y_arr)
+    N_grid = Xg.size
+
+    # Time frames to animate
+    t_frames = np.linspace(t_min, t_max, n_frames)
+
+    # ── Pre-compute all frames ────────────────────────────────────────────────
+    print(f"Pre-computing {n_frames} animation frames...")
+    frames_data = []
+
+    def to_t(a):
+        return torch.tensor(a.flatten(), dtype=torch.float32).unsqueeze(1).to(device)
+
+    model.eval()
+    for i, t_eval in enumerate(t_frames):
+        with torch.no_grad():
+            u_p, v_p, _, _ = model(to_t(Xg), to_t(Yg),
+                                    torch.full((N_grid, 1), t_eval).to(device))
+        u_f = u_p.cpu().numpy().reshape(Xg.shape)
+        v_f = v_p.cpu().numpy().reshape(Xg.shape)
+
+        if field == 'speed':
+            F = np.sqrt(u_f**2 + v_f**2)
+        elif field == 'u':
+            F = u_f
+        elif field == 'v':
+            F = v_f
+        elif field == 'vorticity':
+            dv_dx = np.gradient(v_f, x_arr, axis=1)
+            du_dy = np.gradient(u_f, y_arr, axis=0)
+            F = dv_dx - du_dy
+        else:
+            F = np.sqrt(u_f**2 + v_f**2)
+
+        frames_data.append(F)
+        if (i + 1) % 10 == 0:
+            print(f"  {i+1}/{n_frames} frames computed")
+
+    print("All frames ready — building animation...")
+
+    # ── Build animation ───────────────────────────────────────────────────────
+    field_labels = {'speed': 'Speed [m/s]', 'u': 'u-velocity [m/s]',
+                    'v': 'v-velocity [m/s]', 'vorticity': 'Vorticity [1/s]'}
+    cmaps = {'speed': 'hot', 'u': 'RdBu_r', 'v': 'RdBu_r', 'vorticity': 'RdBu_r'}
+
+    F_all   = np.stack(frames_data)
+    vmin    = np.percentile(F_all, 2)
+    vmax    = np.percentile(F_all, 98)
+
+    fig, ax = plt.subplots(figsize=figsize)
+    im = ax.contourf(Xg, Yg, frames_data[0], 40,
+                      cmap=cmaps.get(field, 'hot'),
+                      vmin=vmin, vmax=vmax)
+    cbar = plt.colorbar(im, ax=ax, label=field_labels.get(field, field))
+    ax.set_aspect('equal')
+    ax.set_xlabel('x', fontsize=11)
+    ax.set_ylabel('y', fontsize=11)
+
+    # Cylinder
+    theta = np.linspace(0, 2*np.pi, 100)
+    # Estimate cylinder radius from data bounds
+    cyl_r = 0.5
+    ax.fill(cyl_r * np.cos(theta), cyl_r * np.sin(theta),
+            color='gray', zorder=5)
+
+    time_text = ax.set_title('', fontsize=11, color=UP_BLUE, fontweight='bold')
+
+    def update(frame):
+        ax.clear()
+        F = frames_data[frame]
+        cf = ax.contourf(Xg, Yg, F, 40,
+                          cmap=cmaps.get(field, 'hot'),
+                          vmin=vmin, vmax=vmax)
+        ax.fill(cyl_r * np.cos(theta), cyl_r * np.sin(theta),
+                color='gray', zorder=5)
+        ax.set_aspect('equal')
+        ax.set_xlabel('x', fontsize=11)
+        ax.set_ylabel('y', fontsize=11)
+        ax.set_title(
+            f'NS PINN — {field_labels.get(field, field)} | '
+            f't = {t_frames[frame]:.2f} s  '
+            f'(inferred from concentration only)',
+            fontsize=10, color=UP_BLUE, fontweight='bold')
+        return cf.collections
+
+    anim = animation.FuncAnimation(
+        fig, update, frames=n_frames, interval=120, blit=False)
+
+    plt.close(fig)
+    print("Animation ready. Display with: HTML(anim.to_jshtml())")
+    return anim
+
+
+def animate_vortex_synthetic(n_frames=40, field='speed', figsize=(13, 4)):
+    """
+    Animate a synthetic Von Kármán vortex street using superposed point vortices.
+    Used as fallback when the pre-trained model or dataset is unavailable.
+
+    Parameters
+    ----------
+    n_frames : int — number of animation frames
+    field    : 'speed' | 'vorticity'
+
+    Returns
+    -------
+    anim : matplotlib.animation.FuncAnimation
+    """
+    import matplotlib.animation as animation
+
+    x_arr = np.linspace(-2.5, 9, 220)
+    y_arr = np.linspace(-3.0, 3.0, 90)
+    Xg, Yg = np.meshgrid(x_arr, y_arr)
+    omega = 2 * np.pi * 0.17  # Strouhal shedding frequency at Re=100
+    t_frames = np.linspace(0, 2*np.pi/omega, n_frames)
+
+    def compute_field(t):
+        U = np.ones_like(Xg)
+        V = np.zeros_like(Xg)
+        vortex_xs = [1.5 + i * 1.2 for i in range(6)]
+        for i, vx in enumerate(vortex_xs):
+            sign   =  1 if i % 2 == 0 else -1
+            vy_u   =  0.5 * np.cos(omega * t + i * np.pi)
+            vy_l   = -0.5 * np.cos(omega * t + i * np.pi)
+            s      = 0.35
+            r2_u   = (Xg - vx)**2 + (Yg - vy_u)**2 + 0.01
+            r2_l   = (Xg - vx)**2 + (Yg - vy_l)**2 + 0.01
+            U += -sign * s * (Yg - vy_u) / r2_u
+            V +=  sign * s * (Xg - vx)   / r2_u
+            U +=  sign * s * (Yg - vy_l) / r2_l
+            V += -sign * s * (Xg - vx)   / r2_l
+        mask = Xg**2 + Yg**2 < 0.26
+        U[mask] = np.nan; V[mask] = np.nan
+        if field == 'vorticity':
+            dv = np.gradient(V, x_arr, axis=1)
+            du = np.gradient(U, y_arr, axis=0)
+            return dv - du
+        return np.sqrt(U**2 + V**2)
+
+    # Pre-compute
+    frames_data = [compute_field(t) for t in t_frames]
+    F_all = np.stack([f for f in frames_data if not np.all(np.isnan(f))])
+    vmin = np.nanpercentile(F_all, 2)
+    vmax = np.nanpercentile(F_all, 98)
+
+    cmap  = 'RdBu_r' if field == 'vorticity' else 'hot'
+    label = 'Vorticity [1/s]' if field == 'vorticity' else 'Speed [m/s]'
+    theta = np.linspace(0, 2*np.pi, 100)
+
+    fig, ax = plt.subplots(figsize=figsize)
+
+    def update(frame):
+        ax.clear()
+        ax.contourf(Xg, Yg, frames_data[frame], 40,
+                     cmap=cmap, vmin=vmin, vmax=vmax)
+        ax.fill(0.5*np.cos(theta), 0.5*np.sin(theta), color='gray', zorder=5)
+        ax.set_aspect('equal')
+        ax.set_xlabel('x', fontsize=11); ax.set_ylabel('y', fontsize=11)
+        ax.set_title(
+            f'Von Kármán Vortex Street — {label} | '
+            f't = {t_frames[frame]:.2f} s  (synthetic)',
+            fontsize=10, color=UP_BLUE, fontweight='bold')
+        return []
+
+    anim = animation.FuncAnimation(
+        fig, update, frames=n_frames, interval=120, blit=False)
+    plt.close(fig)
+    return anim
