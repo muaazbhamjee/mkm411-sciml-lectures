@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment
+.env
+.venv
+env/
+venv/
+
+# Data files — download and generate separately (see README)
+data/cylinder_nektar_wake.mat
+data/ns_pinn_pretrained.pt
+data/ns_pinn_loss_history.npz
+
+# PyTorch checkpoints
+*.pt
+*.pth
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Environment — shared with pinn-heat-transfer repo, not duplicated here
+environment.yml
+requirements.txt
