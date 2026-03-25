@@ -1,8 +1,9 @@
 # Python
-__pycache__/
+/lecture_utils/_pycache__/
 *.py[cod]
 *.pyo
 .Python
+*.pyc
 
 # Jupyter
 .ipynb_checkpoints/
