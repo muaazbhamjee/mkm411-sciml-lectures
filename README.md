@@ -20,6 +20,39 @@ during lectures via VS Code connected to the departmental GPU server (Mjolnir).
 
 ---
 
+## Pre-Lecture Preparation
+
+Before attending these lectures, you are expected to have completed the following:
+
+**Background reading**
+- Review how SciML is being deployed in commercial engineering simulation tools:
+  [ANSYS SimAI](https://www.ansys.com/products/ansys-simai),
+  [Siemens Star-CCM+](https://plm.sw.siemens.com/en-US/simcenter/fluids-thermal-simulation/star-ccm/)
+  and [Simcenter](https://plm.sw.siemens.com/en-US/simcenter/), and
+  [NVIDIA Omniverse](https://www.nvidia.com/en-us/omniverse/)
+- Read the following two papers in full — the lectures assume familiarity with the core ideas:
+  - Raissi, M., Perdikaris, P., & Karniadakis, G.E. (2019). Physics-informed neural
+    networks: A deep learning framework for solving forward and inverse problems involving
+    nonlinear PDEs. *Journal of Computational Physics*, 378, 686–707.
+    https://doi.org/10.1016/j.jcp.2018.10.045
+  - Raissi, M., Yazdani, A., & Karniadakis, G.E. (2020). Hidden fluid mechanics:
+    Learning velocity and pressure fields from flow visualisations. *Science*, 367(6481),
+    1026–1030. https://doi.org/10.1126/science.aaw4741
+
+**Practical setup**
+- Clone the project repository and follow the setup instructions in its README:
+
+`git clone https://github.com/muaazbhamjee/pinn-heat-transfer.git`
+
+- Open `PINN_Heat_Transfer.ipynb`, read through the code in `utils/`, and run the
+  notebook end-to-end. You do not need to understand every line at this stage —
+  the lectures will build that understanding. The goal is familiarity with the
+  structure before you arrive.
+
+> After completing these lectures you will have the theoretical and practical
+> grounding needed to attempt Task 2 in Project 3.
+---
+
 ## Repository Structure
 
 ```
@@ -80,6 +113,41 @@ mkm411-sciml-lectures/
 | 3 | Von Kármán vortex street — Raissi 2020, NS PINN, pre-trained results |
 | 4 | Strengths, failure modes, and open challenges |
 | 5 | Panorama — DeepONet, FNO, GNNs, GANs, Foundation Models |
+
+### Learning Outcomes
+
+By the end of these lectures you will be able to:
+
+- Explain why machine learning is entering scientific computing and engineering
+  simulation, and articulate the specific limitations of classical CFD that motivate
+  surrogate and physics-constrained approaches
+- Describe the architecture of a fully-connected neural network — inputs, layers,
+  weights, biases, activation functions — and calculate the number of learnable
+  parameters for a given architecture
+- Justify the choice of `tanh` over `ReLU` as the activation function in PINNs,
+  grounded in the requirement for twice-differentiable activations with non-zero
+  second derivative
+- Explain backpropagation as an application of the chain rule, and distinguish it
+  from the autograd mechanism used to compute PDE derivatives in PINNs
+- Derive the PINN loss function for a second-order PDE, including the role of
+  boundary and initial condition terms and the effect of loss weights on training
+  stability
+- Explain the two-phase Adam + L-BFGS optimisation strategy and justify why each
+  phase is necessary
+- Recognise the practical importance of input normalisation in neural network
+  training and apply the chain rule correction for PDE residuals computed in
+  normalised coordinates
+- Interpret training and validation loss curves to diagnose underfitting,
+  overfitting, and convergence
+- Situate PINNs within the broader Scientific Machine Learning landscape —
+  including neural operators, graph neural networks, generative models, recurrent
+  networks, reservoir computing, and foundation models — and identify the
+  engineering contexts where each is most appropriate
+- Critically evaluate the strengths and failure modes of physics-informed
+  approaches, and articulate where established numerical methods remain superior
+  and where SciML augments rather than replaces them
+- Apply the above to implement, train, and systematically tune a parametric PINN
+  for two-dimensional unsteady heat conduction in Task 2 of Project Component 3
 
 ---
 
