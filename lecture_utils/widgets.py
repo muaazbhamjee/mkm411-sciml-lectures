@@ -48,16 +48,20 @@ def activation_explorer():
     functions = {
         "tanh":    (np.tanh(x),
                     1 - np.tanh(x)**2,
-                    UP_BLUE,   "tanh — smooth, bounded, non-zero gradient everywhere"),
+                    -2 * np.tanh(x) * (1 - np.tanh(x)**2),
+                    UP_BLUE, "tanh"),
         "ReLU":    (np.maximum(0, x),
                     (x > 0).astype(float),
-                    ACCENT,    "ReLU — zero gradient for x<0, zero second derivative"),
+                    np.zeros_like(x),
+                    ACCENT, "ReLU"),
         "Sigmoid": (1 / (1 + np.exp(-x)),
                     (1/(1+np.exp(-x))) * (1 - 1/(1+np.exp(-x))),
-                    UP_GOLD,   "Sigmoid — saturates at extremes (vanishing gradient)"),
+                    (1/(1+np.exp(-x))) * (1 - 1/(1+np.exp(-x))) * (1 - 2/(1+np.exp(-x))),
+                    UP_GOLD, "Sigmoid"),
         "ELU":     (np.where(x >= 0, x, np.exp(x) - 1),
                     np.where(x >= 0, 1.0, np.exp(x)),
-                    "green",   "ELU — smooth for x<0, linear for x>0"),
+                    np.where(x >= 0, 0.0, np.exp(x)),
+                    "green", "ELU"),
     }
 
     checks = {name: widgets.Checkbox(value=(name in ["tanh", "ReLU"]),
@@ -82,17 +86,19 @@ def activation_explorer():
 
     def update(*args):
         with plt.ioff():
-            ncols = 2 if show_deriv.value else 1
-            fig, axes = plt.subplots(1, ncols, figsize=(13, 4))
+            ncols = 3 if show_deriv.value else 1
+            fig, axes = plt.subplots(1, ncols, figsize=(18, 4))
             if ncols == 1:
-                axes = [axes]
+                axes = [axes, None, None]
 
-            for name, (fx, dfx, colour, label) in functions.items():
+            for name, (fx, dfx, d2fx, colour, label) in functions.items():
                 if checks[name].value:
-                    axes[0].plot(x, fx, color=colour, linewidth=2.0, label=name)
+                    axes[0].plot(x, fx,   color=colour, linewidth=2.0, label=name)
                     if show_deriv.value:
-                        axes[1].plot(x, dfx, color=colour, linewidth=2.0,
-                                     linestyle="--", label=f"d/dx {name}")
+                        axes[1].plot(x, dfx,  color=colour, linewidth=2.0,
+                                    linestyle="--", label=f"d/dx {name}")
+                        axes[2].plot(x, d2fx, color=colour, linewidth=2.0,
+                                    linestyle=":", label=f"d²/dx² {name}")
 
             axes[0].set_title("Activation Functions $f(x)$",
                                fontsize=12, color=UP_BLUE)
@@ -103,20 +109,21 @@ def activation_explorer():
             axes[0].set_ylim(-1.5, 1.5)
 
             if show_deriv.value:
-                axes[1].set_title("First Derivative $f'(x)$",
-                                   fontsize=12, color=UP_BLUE)
-                axes[1].axhline(0, color="gray", linewidth=0.5)
-                axes[1].axvline(0, color="gray", linewidth=0.5)
-                axes[1].set_xlabel("$x$"); axes[1].set_ylabel("$f'(x)$")
-                axes[1].legend(fontsize=9); axes[1].grid(True, alpha=0.3)
-                axes[1].set_ylim(-0.3, 1.3)
+                # ... existing axes[1] config ...
+
+                axes[2].set_title("Second Derivative $f''(x)$",
+                                fontsize=12, color=UP_BLUE)
+                axes[2].axhline(0, color="gray", linewidth=0.5)
+                axes[2].axvline(0, color="gray", linewidth=0.5)
+                axes[2].set_xlabel("$x$"); axes[2].set_ylabel("$f''(x)$")
+                axes[2].legend(fontsize=9); axes[2].grid(True, alpha=0.3)
 
                 if pinn_note.value:
-                    axes[1].axhline(0, color=ACCENT, linewidth=1.5,
+                    axes[2].axhline(0, color=ACCENT, linewidth=1.5,
                                     linestyle=":", alpha=0.8)
-                    axes[1].text(3.5, 0.05,
-                                 "PINNs need\n$f'(x) \\neq 0$",
-                                 color=ACCENT, fontsize=8, ha="right")
+                    axes[2].text(3.5, 0.05,
+                                "PINNs need\n$f''(x) \\neq 0$",
+                                color=ACCENT, fontsize=8, ha="right")
 
             plt.suptitle(
                 "Key insight: PINNs compute $\\partial^2 T/\\partial x^2$ "
