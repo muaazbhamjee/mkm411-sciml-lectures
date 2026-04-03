@@ -1,0 +1,103 @@
+cff-version: 1.2.0
+title: "MKM411 SciML Lectures — Scientific Machine Learning Lecture Notebooks for Undergraduate CFD Education"
+message: "If you use these lecture materials in your research or teaching, please cite them as below."
+type: software
+version: 1.0.0
+date-released: 2026-04-01
+license: GPL-3.0
+repository-code: https://github.com/muaazbhamjee/mkm411-sciml-lectures
+
+authors:
+  - family-names: Bhamjee
+    given-names: Muaaz
+    affiliation: "Department of Mechanical and Aeronautical Engineering, University of Pretoria"
+    email: muaaz.bhamjee@up.ac.za
+    orcid: https://orcid.org/0000-0002-2697-4589
+
+abstract: >
+  Open-source interactive lecture notebooks for the Scientific Machine Learning (SciML)
+  component of MKM411 Computational Fluid Dynamics at the University of Pretoria.
+  Delivered as two-part Jupyter notebooks, the material introduces artificial neural
+  network fundamentals, weight initialisation, backpropagation, and the broader SciML
+  landscape — including PINNs, neural operators, GANs, RNNs, reservoir computing, and
+  foundation models — before deriving the PINN loss function and demonstrating its
+  application to the Von Kármán vortex street. All figures, interactive widgets, and
+  animations are implemented in a supporting open-source library. The lectures are
+  designed to be self-contained and replicable at other institutions.
+
+keywords:
+  - physics-informed neural networks
+  - scientific machine learning
+  - computational fluid dynamics
+  - Navier-Stokes equations
+  - engineering education
+  - Jupyter notebooks
+  - interactive teaching
+  - University of Pretoria
+  - undergraduate education
+
+references:
+  - type: article
+    title: "Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear PDEs"
+    authors:
+      - family-names: Raissi
+        given-names: Maziar
+      - family-names: Perdikaris
+        given-names: Paris
+      - family-names: Karniadakis
+        given-names: George Em
+    journal: "Journal of Computational Physics"
+    volume: 378
+    pages: "686-707"
+    year: 2019
+    doi: 10.1016/j.jcp.2018.10.045
+
+  - type: article
+    title: "Hidden fluid mechanics: Learning velocity and pressure fields from flow visualizations"
+    authors:
+      - family-names: Raissi
+        given-names: Maziar
+      - family-names: Yazdani
+        given-names: Alireza
+      - family-names: Karniadakis
+        given-names: George Em
+    journal: Science
+    volume: 367
+    issue: 6481
+    pages: "1026-1030"
+    year: 2020
+    doi: 10.1126/science.aaw4741
+
+  - type: article
+    title: "Learning nonlinear operators via DeepONet based on the universal approximation theorem of operators"
+    authors:
+      - family-names: Lu
+        given-names: Lu
+      - family-names: Jin
+        given-names: Pengzhan
+      - family-names: Pang
+        given-names: Guofei
+      - family-names: Zhang
+        given-names: Zhongqiang
+      - family-names: Karniadakis
+        given-names: George Em
+    journal: "Nature Machine Intelligence"
+    volume: 3
+    pages: "218-229"
+    year: 2021
+    doi: 10.1038/s42256-021-00302-5
+
+  - type: article
+    title: "Machine learning for fluid mechanics"
+    authors:
+      - family-names: Brunton
+        given-names: Steven L
+      - family-names: Noack
+        given-names: Bernd R
+      - family-names: Koumoutsakos
+        given-names: Petros
+    journal: "Annual Review of Fluid Mechanics"
+    volume: 52
+    pages: "477-508"
+    year: 2020
+    doi: 10.1146/annurev-fluid-010719-060214

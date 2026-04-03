@@ -214,6 +214,28 @@ The student project repository — implementing a heat equation PINN for the
 Weber grill problem — is hosted separately:  
 https://github.com/muaazbhamjee/pinn-heat-transfer
 
+--- 
+
+## Citation
+
+If you use these lecture materials in your research or teaching, please cite them
+using the reference in `CITATION.cff` or the following:
+
+> Bhamjee, M. (2025). *MKM411 SciML Lectures — Scientific Machine Learning Lecture
+> Notebooks for Undergraduate CFD Education* [Software]. University of Pretoria.
+> https://github.com/muaazbhamjee/mkm411-sciml-lectures
+
+The lecture content is grounded in the following primary references:
+
+> Raissi, M., Perdikaris, P., & Karniadakis, G.E. (2019). Physics-informed neural
+> networks: A deep learning framework for solving forward and inverse problems
+> involving nonlinear PDEs. *Journal of Computational Physics*, 378, 686–707.
+> https://doi.org/10.1016/j.jcp.2018.10.045
+
+> Brunton, S.L., Noack, B.R., & Koumoutsakos, P. (2020). Machine learning for
+> fluid mechanics. *Annual Review of Fluid Mechanics*, 52, 477–508.
+> https://doi.org/10.1146/annurev-fluid-010719-060214
+
 ---
 
 ## Contact
