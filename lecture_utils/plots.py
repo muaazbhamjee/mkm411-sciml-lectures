@@ -78,7 +78,7 @@ def draw_network(ax, layer_sizes, title=None):
 
 # ── SciML landscape ───────────────────────────────────────────────────────────
 
-def plot_sciml_landscape(highlight_pinn=True):
+def plot_sciml_landscape(highlight_pinn=True, highlight_fdm_fvm=True):
     """
     Visualise the Scientific Machine Learning landscape.
 
@@ -116,9 +116,16 @@ def plot_sciml_landscape(highlight_pinn=True):
     if highlight_pinn:
         ax.annotate('We are here\n(this lecture)',
                     xy=(0.30, 0.50),
-                    xytext=(0.18, 0.80),
+                    xytext=(0.35, 0.80),
                     arrowprops=dict(arrowstyle='->', color=UP_GOLD, lw=2),
                     fontsize=10, color=UP_GOLD, fontweight='bold')
+        
+    if highlight_fdm_fvm:
+        ax.annotate('You are learning this \n(in MKM 411)',
+                    xy=(0.05, 0.50),
+                    xytext=(0.09, 0.80),
+                    arrowprops=dict(arrowstyle='->', color=UP_BLUE, lw=2),
+                    fontsize=10, color=UP_BLUE, fontweight='bold')
 
     ax.set_xlim(0, 1); ax.set_ylim(-0.05, 1.0)
     ax.axis('off')
@@ -1310,12 +1317,23 @@ def animate_cylinder_wake(model, data_path, norm_path, device='cpu',
     t_scale = t_max - t_min
 
     # ── Evaluation grid — stay within training domain ─────────────────────────
-    x_arr = np.linspace(x_min, x_max, 200)
-    y_arr = np.linspace(y_min, y_max, 80)
-    Xg, Yg = np.meshgrid(x_arr, y_arr)
-    N_grid  = Xg.size
+    # x_arr = np.linspace(x_min, x_max, 200)
+    # y_arr = np.linspace(y_min, y_max, 80)
+    # Xg, Yg = np.meshgrid(x_arr, y_arr)
+    # N_grid  = Xg.size
 
     # Normalise grid to [0,1] — must match training normalisation exactly
+    # Xg_n = (Xg - x_min) / x_scale
+    # Yg_n = (Yg - y_min) / y_scale
+
+    # Extend grid upstream to show cylinder — model extrapolates cleanly here
+    # since upstream flow is nearly uniform (u≈1, v≈0)
+    x_arr = np.linspace(-1.0, x_max, 220)   # hard-code -1.0 as upstream limit
+    y_arr = np.linspace(y_min, y_max, 80)
+    Xg, Yg = np.meshgrid(x_arr, y_arr)
+    N_grid  = Xg.size   # add this line
+
+    # Normalise using training constants — values outside [0,1] are extrapolation
     Xg_n = (Xg - x_min) / x_scale
     Yg_n = (Yg - y_min) / y_scale
 

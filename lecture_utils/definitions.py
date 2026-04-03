@@ -187,6 +187,14 @@ DEF_REGULARISATION = """\
 > - **Dropout**: randomly zeros neurons during training, preventing co-adaptation
 > - **Early stopping**: halts training when validation loss begins to increase
 > All three are ways of reducing effective model complexity without reducing depth or width.  
+
+> **Co-adaptation** occurs when neurons learn to rely on the presence of specific
+> other neurons to correct their errors, rather than learning independently useful
+> features. The network effectively memorises a set of neuron partnerships that work
+> well on training data but fail to generalise. Dropout breaks co-adaptation by
+> randomly disabling neurons during each training step — no neuron can depend on
+> any other being present, so each is forced to learn robust features independently.
+
 > *(Goodfellow et al., 2016, §7)*
 """
 
