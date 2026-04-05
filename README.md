@@ -306,6 +306,23 @@ The lecture content is grounded in the following primary references:
 
 ---
 
+## Attribution:
+
+During development, the following AI-assisted tools were used:
+
+* Claude AI (Anthropic):
+  * debugging 
+  * architecture decisions
+  * physics implementation guidance
+  * code generation and review
+  * documentation
+
+All research questions, pedagogical design decisions, theoretical contributions, and experimental results are the authors' own. 
+
+The cylinder wake dataset used in the lecture demonstration is sourced from the publicly available repository accompanying Raissi et al. (2019): https://github.com/maziarraissi/PINNs
+
+---
+
 ## Contact
 
-muaaz.bhamjee@up.ac.za
+Raise technical issues via email to Prof Bhamjee on muaaz.bhamjee@up.ac.za  
