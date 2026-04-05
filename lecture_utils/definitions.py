@@ -304,6 +304,12 @@ equations. *ICLR 2021*. https://arxiv.org/abs/2010.08895
 Jaeger, H. (2001). The echo state approach to analysing and training recurrent
 neural networks. *GMD Report 148*. German National Research Center for Information
 Technology.
+
+Tancik, M., Srinivasan, P.P., Mildenhall, B., Fridovich-Keil, S., Raghavan, N.,
+Singhal, U., Ramamoorthi, R., Barron, J.T., & Ng, R. (2020). Fourier features let
+networks learn high frequency functions in low dimensional domains.
+*Advances in Neural Information Processing Systems*, 33, 7537–7547.
+https://arxiv.org/abs/2006.10739
 """
 
 # ── Helper ────────────────────────────────────────────────────────────────────
