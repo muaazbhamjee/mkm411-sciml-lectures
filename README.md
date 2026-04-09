@@ -323,6 +323,12 @@ The cylinder wake dataset used in the lecture demonstration is sourced from the 
 
 ---
 
+## Licence
+
+Released under the [GNU General Public Licence v3.0](LICENSE) — you are free to use, modify, and redistribute it under the same licence terms.
+
+---
+
 ## Contact
 
 Raise technical issues via email to Prof Bhamjee on muaaz.bhamjee@up.ac.za  
